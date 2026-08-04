@@ -5,7 +5,10 @@ const cors = require('cors');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Modelos de MongoDB
 const Image = require('./models/Image');
+const News = require('./models/News');
 
 const app = express();
 
@@ -37,10 +40,12 @@ mongoose
   .then(() => console.log('✅ Conectado con éxito a MongoDB'))
   .catch((err) => console.error('❌ Error conectando a MongoDB:', err));
 
-// --- RUTAS DE LA API ---
+// ==========================================
+// 📸 RUTAS DE FOTOS DE LA GALERÍA
+// ==========================================
 
-// 1. Obtener todas las imágenes para la galería
-app.get('/api/images', async (req, res) => {
+// 1. Obtener todas las imágenes
+app.get('/api/photos', async (req, res) => {
   try {
     const images = await Image.find().sort({ createdAt: -1 });
     res.json(images);
@@ -50,25 +55,30 @@ app.get('/api/images', async (req, res) => {
 });
 
 // 2. Subir una nueva imagen
-app.post('/api/upload', upload.single('image'), async (req, res) => {
+app.post('/api/photos/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No se subió ninguna imagen' });
     }
 
-    const newImage = new Image({ imageUrl: req.file.path });
+    const { uploaderName } = req.body;
+
+    const newImage = new Image({ 
+      imageUrl: req.file.path,
+      uploaderName: uploaderName || 'Invitado'
+    });
+    
     await newImage.save();
 
     res.status(201).json(newImage);
   } catch (error) {
+    console.error('Error al subir la imagen:', error);
     res.status(500).json({ error: 'Error al guardar la imagen' });
   }
 });
 
-const PORT = process.env.PORT || 5000;
-
-// Endpoint para eliminar una imagen por su ID
-app.delete('/api/images/:id', async (req, res) => {
+// 3. Eliminar una imagen por ID
+app.delete('/api/photos/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await Image.findByIdAndDelete(id);
@@ -79,4 +89,59 @@ app.delete('/api/images/:id', async (req, res) => {
   }
 });
 
+// ==========================================
+// 📰 RUTAS DE NOTICIAS Y FLYERS
+// ==========================================
+
+// 1. Obtener todas las noticias/flyers
+app.get('/api/news', async (req, res) => {
+  try {
+    const newsList = await News.find().sort({ createdAt: -1 });
+    res.json(newsList);
+  } catch (error) {
+    console.error('Error al obtener noticias:', error);
+    res.status(500).json({ error: 'Error al obtener noticias' });
+  }
+});
+
+// 2. Crear una nueva noticia o flyer (con o sin imagen)
+app.post('/api/news', upload.single('image'), async (req, res) => {
+  try {
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ error: 'El título y el contenido son requeridos' });
+    }
+
+    // Si el usuario adjuntó una imagen, req.file.path contiene la URL de Cloudinary
+    const imageUrl = req.file ? req.file.path : null;
+
+    const newNews = new News({
+      title,
+      content,
+      imageUrl
+    });
+
+    await newNews.save();
+    res.status(201).json(newNews);
+  } catch (error) {
+    console.error('Error al publicar noticia:', error);
+    res.status(500).json({ error: 'Error al guardar la noticia' });
+  }
+});
+
+// 3. Eliminar una noticia o flyer por ID
+app.delete('/api/news/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await News.findByIdAndDelete(id);
+    res.json({ message: 'Noticia eliminada correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar noticia:', error);
+    res.status(500).json({ error: 'Error al eliminar la noticia' });
+  }
+});
+
+// Inicio del Servidor
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Servidor ejecutándose en el puerto ${PORT}`));

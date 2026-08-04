@@ -1,161 +1,466 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { QRCodeSVG } from 'qrcode.react';
-import Swal from 'sweetalert2';
-import { Upload, Image as ImageIcon, QrCode, Trash2, X } from 'lucide-react';
+import { 
+  Camera, 
+  MessageCircle, 
+  Trophy, 
+  X, 
+  QrCode, 
+  Download, 
+  MapPin, 
+  Clock, 
+  Mail,
+  Globe,
+  Share2,
+  Trash2,
+  Shield,
+  Newspaper,
+  Image as ImageIcon
+} from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
+
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
 import './App.css';
 
 function App() {
-  const [images, setImages] = useState([]);
+  const [photos, setPhotos] = useState([]);
+  const [newsList, setNewsList] = useState([]);
   const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // Estado para el modal de vista previa
+  const [uploaderName, setUploaderName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const backendUrl = 'http://localhost:5000';
-  const currentAppUrl = window.location.href;
+  // Estados de Admin y Noticias
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  
+  const [newsTitle, setNewsTitle] = useState('');
+  const [newsContent, setNewsContent] = useState('');
+  const [newsFile, setNewsFile] = useState(null);
 
-  const fetchImages = async () => {
+  const qrRef = useRef();
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const eventBannerUrl = "/banner.png"; 
+
+  const whatsappNumber = "5493812170571"; 
+  const whatsappMessage = encodeURIComponent("¡Hola! Quisiera más información sobre el evento de Lucha de Brazos 💪");
+
+  const fetchPhotos = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/images`);
-      setImages(res.data);
-    } catch (error) {
-      console.error('Error al obtener imágenes:', error);
+      const res = await axios.get('http://localhost:5000/api/photos');
+      setPhotos(res.data || []);
+    } catch (err) {
+      console.error("Error al cargar fotos:", err);
+    }
+  };
+
+  const fetchNews = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/news');
+      setNewsList(res.data || []);
+    } catch (err) {
+      console.error("Error al cargar noticias:", err);
     }
   };
 
   useEffect(() => {
-    fetchImages();
+    fetchPhotos();
+    fetchNews();
   }, []);
+
+  // Animación al hacer scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    const elements = document.querySelectorAll('.reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [photos, newsList, isAdmin]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) {
-      return Swal.fire('Atención', 'Selecciona una foto primero', 'warning');
-    }
+    if (!file) return alert('Por favor selecciona una imagen');
 
     const formData = new FormData();
     formData.append('image', file);
-
-    setUploading(true);
+    formData.append('uploaderName', uploaderName || 'Invitado');
 
     try {
-      await axios.post(`${backendUrl}/api/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      
-      Swal.fire('¡Éxito!', 'Tu foto ha sido subida a la galería 🚀', 'success');
+      setLoading(true);
+      await axios.post('http://localhost:5000/api/photos/upload', formData);
       setFile(null);
-      e.target.reset(); // Limpia el input de archivo
-      fetchImages();
-    } catch (error) {
-      console.error(error);
-      Swal.fire('Error', 'No se pudo subir la imagen', 'error');
+      setUploaderName('');
+      fetchPhotos();
+    } catch (err) {
+      alert('Error al subir la imagen');
     } finally {
-      setUploading(false);
+      setLoading(false);
     }
   };
 
-  // Función para eliminar imagen
-  const handleDelete = async (id, e) => {
-    e.stopPropagation(); // Evita abrir la imagen en grande al presionar borrar
-
-    const result = await Swal.fire({
-      title: '¿Eliminar imagen?',
-      text: 'Esta acción no se puede deshacer',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Sí, borrar',
-      cancelButtonText: 'Cancelar'
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`${backendUrl}/api/images/${id}`);
-        Swal.fire('Borrada', 'La foto fue eliminada.', 'success');
-        fetchImages();
-      } catch (error) {
-        console.error(error);
-        Swal.fire('Error', 'No se pudo borrar la foto', 'error');
-      }
+  // Login de Admin
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    if (adminPassword === 'admin123') { // Cambiá esta clave por la que prefieras
+      setIsAdmin(true);
+      setShowLoginModal(false);
+      setAdminPassword('');
+    } else {
+      alert('Contraseña incorrecta');
     }
+  };
+
+  // Eliminar foto (Admin)
+  const handleDeletePhoto = async (id, e) => {
+    e.stopPropagation();
+    if (!window.confirm('¿Estás seguro de que querés borrar esta foto?')) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/photos/${id}`);
+      fetchPhotos();
+    } catch (err) {
+      alert('Error al eliminar la foto');
+    }
+  };
+
+  // Crear noticia / flyer (Admin)
+  const handleCreateNews = async (e) => {
+    e.preventDefault();
+    if (!newsTitle || !newsContent) return alert('Título y contenido son obligatorios');
+
+    const formData = new FormData();
+    formData.append('title', newsTitle);
+    formData.append('content', newsContent);
+    if (newsFile) formData.append('image', newsFile);
+
+    try {
+      await axios.post('http://localhost:5000/api/news', formData);
+      setNewsTitle('');
+      setNewsContent('');
+      setNewsFile(null);
+      fetchNews();
+      alert('Noticia publicada con éxito');
+    } catch (err) {
+      alert('Error al publicar noticia');
+    }
+  };
+
+  // Eliminar noticia (Admin)
+  const handleDeleteNews = async (id) => {
+    if (!window.confirm('¿Borrar esta noticia?')) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/news/${id}`);
+      fetchNews();
+    } catch (err) {
+      alert('Error al borrar la noticia');
+    }
+  };
+
+  const downloadQR = () => {
+    if (!qrRef.current) return;
+    const canvas = qrRef.current.querySelector('canvas');
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'QR_Lucha_De_Brazos.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="container">
-      <h1 className="header-title">📸 Galería</h1>
-
-      {/* Tarjeta del Código QR */}
-      <div className="card">
-        <h3><QrCode size={20} /> Escanea para compartir tu foto</h3>
-        <p className="subtitle">
-          Escanea este QR desde cualquier celular para subir tus fotos del evento.
-        </p>
-        <div className="qr-container">
-          <QRCodeSVG value={currentAppUrl} size={150} />
-        </div>
-      </div>
-
-      {/* Tarjeta de Formulario */}
-      <div className="card">
-        <h3><Upload size={20} /> Subir una foto</h3>
-        <form onSubmit={handleUpload}>
-          <div className="file-input-wrapper">
-            <input
-              type="file"
-              accept="image/*"
-              className="file-input"
-              onChange={(e) => setFile(e.target.files[0])}
-            />
+    <div className="main-wrapper">
+      <div className="container">
+        {/* Encabezado con acceso Admin */}
+        <header className="header">
+          <div className="admin-bar">
+            {isAdmin ? (
+              <span className="admin-badge">
+                <Shield size={16} /> Modo Administrador
+                <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
+              </span>
+            ) : (
+              <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
+                <Shield size={16} /> Admin
+              </button>
+            )}
           </div>
-          <button className="btn" type="submit" disabled={uploading}>
-            {uploading ? 'Subiendo foto...' : 'Publicar Foto'}
-          </button>
-        </form>
-      </div>
+          <h1><Trophy size={32} color="#ffb703" /> Lucha de Brazos</h1>
+          <p>Galería Oficial del Evento</p>
+        </header>
 
-      {/* Tarjeta de Galería */}
-      <div className="card">
-        <h3>
-          <ImageIcon size={20} /> Fotos subidas 
-          <span className="badge">{images.length}</span>
-        </h3>
-        {images.length === 0 ? (
-          <p className="empty-state">Aún no hay fotos. ¡Sé el primero en subir una!</p>
-        ) : (
-          <div className="gallery-grid">
-            {images.map((img) => (
-              <div 
-                key={img._id} 
-                className="gallery-item"
-                onClick={() => setSelectedImage(img.imageUrl)}
-              >
-                <img src={img.imageUrl} alt="Evento" />
-                <button 
-                  className="delete-btn" 
-                  title="Eliminar foto"
-                  onClick={(e) => handleDelete(img._id, e)}
-                >
-                  <Trash2 size={14} />
-                </button>
+        {/* Banner del Evento */}
+        <div className="event-banner-card reveal">
+          <img src={eventBannerUrl} alt="Banner del Evento" className="event-banner-img" />
+          <div className="banner-overlay">
+            <h3>¡Bienvenidos al Torneo Oficial!</h3>
+            <p>Subí tus mejores tomas de las peleas y compartilas en la galería en vivo.</p>
+          </div>
+        </div>
+
+        {/* Sección Panel Admin: Publicar Noticias/Flyers */}
+        {isAdmin && (
+          <div className="admin-panel-card reveal">
+            <h3><Newspaper size={20} color="#ffb703" /> Crear Nueva Noticia o Flyer</h3>
+            <form onSubmit={handleCreateNews} className="admin-form">
+              <input 
+                type="text" 
+                placeholder="Título de la noticia o aviso" 
+                value={newsTitle} 
+                onChange={(e) => setNewsTitle(e.target.value)} 
+                className="name-input"
+              />
+              <textarea 
+                placeholder="Descripción / Detalle del evento o novedad..." 
+                value={newsContent} 
+                onChange={(e) => setNewsContent(e.target.value)} 
+                className="name-input textarea-input"
+              />
+              <div className="file-input-wrapper">
+                <label><ImageIcon size={18} /> Adjuntar Imagen/Flyer (Opcional):</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => setNewsFile(e.target.files[0])} 
+                />
               </div>
-            ))}
+              <button type="submit" className="btn-primary">Publicar Novedad 📢</button>
+            </form>
+          </div>
+        )}
+
+        {/* Sección de Noticias y Flyers */}
+        {newsList.length > 0 && (
+          <div className="news-section reveal">
+            <h2 className="gallery-title">Novedades y Flyers</h2>
+            <div className="news-grid">
+              {newsList.map((item) => (
+                <div key={item._id || item.id} className="news-card">
+                  {item.imageUrl && <img src={item.imageUrl} alt={item.title} className="news-img" />}
+                  <div className="news-body">
+                    <h3>{item.title}</h3>
+                    <p>{item.content}</p>
+                    {isAdmin && (
+                      <button 
+                        onClick={() => handleDeleteNews(item._id || item.id)} 
+                        className="btn-delete"
+                      >
+                        <Trash2 size={16} /> Eliminar Noticia
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Formulario de Subida de Fotos */}
+        <div className="upload-card reveal">
+          <form onSubmit={handleUpload} className="upload-form">
+            <div className="file-dropzone" onClick={() => document.getElementById('fileInput').click()}>
+              <Camera size={40} color="#ffb703" />
+              <p style={{ marginTop: '10px' }}>
+                {file ? file.name : "Tocá acá para sacar foto o subir de la galería"}
+              </p>
+              <input 
+                id="fileInput"
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => setFile(e.target.files[0])} 
+                style={{ display: 'none' }}
+              />
+            </div>
+
+            <input 
+              type="text" 
+              placeholder="Tu nombre (Opcional)"
+              value={uploaderName}
+              onChange={(e) => setUploaderName(e.target.value)}
+              className="name-input"
+            />
+
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Subiendo...' : 'Publicar Foto 🚀'}
+            </button>
+          </form>
+        </div>
+
+        {/* Carrusel de Fotos */}
+        <h2 className="gallery-title reveal">Fotos del Evento</h2>
+        
+        {photos.length === 0 ? (
+          <p className="no-photos reveal" style={{ textAlign: 'center', color: '#a0a0ab', padding: '20px' }}>
+            Aún no hay fotos. ¡Sé el primero en subir una!
+          </p>
+        ) : (
+          <div className="carousel-container reveal">
+            <Swiper
+              modules={[Navigation, Pagination, Autoplay]}
+              spaceBetween={20}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              autoplay={{ delay: 3500, disableOnInteraction: false }}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }}
+              className="mySwiper"
+            >
+              {photos.map((photo) => (
+                <SwiperSlide key={photo._id || photo.id}>
+                  <div className="card" onClick={() => setSelectedImage(photo.imageUrl)}>
+                    <img src={photo.imageUrl} alt="Foto del evento" />
+                    <div className="card-info">
+                      <p>📸 {photo.uploaderName || 'Invitado'}</p>
+                    </div>
+                    {isAdmin && (
+                      <button 
+                        className="btn-delete-overlay"
+                        onClick={(e) => handleDeletePhoto(photo._id || photo.id, e)}
+                        title="Borrar Foto"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        )}
+
+        {/* Tarjeta QR */}
+        <div className="qr-card reveal">
+          <div className="qr-header">
+            <QrCode size={24} color="#ffb703" />
+            <h3>Código QR del Evento</h3>
+          </div>
+          <p>Escaneá para acceder o descargalo para imprimir:</p>
+          
+          <div className="qr-container" ref={qrRef}>
+            {currentUrl && (
+              <QRCodeCanvas 
+                value={currentUrl} 
+                size={180} 
+                bgColor={"#ffffff"} 
+                fgColor={"#000000"} 
+                level={"H"}
+                includeMargin={true}
+              />
+            )}
+          </div>
+
+          <button onClick={downloadQR} className="btn-secondary">
+            <Download size={18} /> Descargar QR Imprimible
+          </button>
+        </div>
+
+        {/* Modal de Imagen Ampliada */}
+        {selectedImage && (
+          <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="close-btn" onClick={() => setSelectedImage(null)}>
+                <X size={28} />
+              </button>
+              <img src={selectedImage} alt="Foto ampliada" />
+            </div>
+          </div>
+        )}
+
+        {/* Modal Login Admin */}
+        {showLoginModal && (
+          <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
+            <div className="admin-login-card" onClick={(e) => e.stopPropagation()}>
+              <h3>Acceso Administrador</h3>
+              <form onSubmit={handleAdminLogin}>
+                <input 
+                  type="password" 
+                  placeholder="Contraseña"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="name-input"
+                  autoFocus
+                />
+                <div className="login-actions">
+                  <button type="submit" className="btn-primary">Ingresar</button>
+                  <button type="button" className="btn-secondary" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>
 
-      {/* MODAL DE VISTA PREVIA EN PANTALLA COMPLETA */}
-      {selectedImage && (
-        <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedImage(null)}>
-              <X size={24} />
-            </button>
-            <img src={selectedImage} alt="Foto ampliada" className="modal-image" />
+      {/* Footer */}
+      <footer className="footer reveal">
+        <div className="footer-content">
+          <div className="footer-section brand-col">
+            <h2 className="footer-title"><Trophy size={22} color="#ffb703" /> LUCHA DE BRAZOS</h2>
+            <p className="footer-desc">
+              El evento más grande de la disciplina. Viví la experiencia, compartí tus fotos en tiempo real y seguí cada enfrentamiento.
+            </p>
+            <div className="social-links">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram">
+                <Share2 size={18} /> Instagram
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" title="Facebook">
+                <Globe size={18} /> Web
+              </a>
+              <a href="mailto:contacto@luchadebrazos.com" title="Email">
+                <Mail size={18} />
+              </a>
+            </div>
+          </div>
+
+          <div className="footer-section">
+            <h3><Clock size={18} color="#ffb703" /> Horarios</h3>
+            <ul>
+              <li>Apertura de Puertas: 16:00 hs</li>
+              <li>Inicio Torneo: 18:00 hs</li>
+              <li>Finales: 21:00 hs</li>
+            </ul>
+          </div>
+
+          <div className="footer-section location-col">
+            <h3><MapPin size={18} color="#ffb703" /> Ubicación</h3>
+            <p>Complejo Belgrano</p>
+            <p className="address">Av. Saenz Peña 2100, Capital</p>
           </div>
         </div>
-      )}
+
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} Lucha de Brazos. Todos los derechos reservados.</p>
+        </div>
+      </footer>
+
+      {/* Botón Flotante WhatsApp */}
+      <a 
+        href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`} 
+        className="whatsapp-float" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+        <MessageCircle size={24} />
+        <span>Contacto</span>
+      </a>
     </div>
   );
 }
