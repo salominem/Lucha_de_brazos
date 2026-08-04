@@ -84,11 +84,11 @@ function App() {
 
   return (
     <div className="container">
-      <h1 className="header-title">📸 Galería interactiva QR</h1>
+      <h1 className="header-title">📸 Galería</h1>
 
       {/* Tarjeta del Código QR */}
       <div className="card">
-        <h3><QrCode size={20} /> Escanea para compartir</h3>
+        <h3><QrCode size={20} /> Escanea para compartir tu foto</h3>
         <p className="subtitle">
           Escanea este QR desde cualquier celular para subir tus fotos del evento.
         </p>
