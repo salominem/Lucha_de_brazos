@@ -47,7 +47,7 @@ function App() {
 
   const qrRef = useRef();
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const eventBannerUrl = "/banner.png";
+  const eventBannerUrl = "/luchadebrazos.jpg";
 
   const whatsappNumber = "5493812170571";
   const whatsappMessage = encodeURIComponent("¡Hola! Quisiera más información sobre el evento de Lucha de Brazos 💪");
@@ -210,14 +210,14 @@ function App() {
       </span>
     ) : (
       <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
-        <Shield size={16} /> Admin
+         Login
       </button>
     )}
   </div>
 </header>
 
         {/* Banner del Evento */}
-        <div className="event-banner-card reveal">
+        <div className="event-banner-card">
           <img src={eventBannerUrl} alt="Banner del Evento" className="event-banner-img" />
           <div className="banner-overlay">
             <h3>¡Bienvenidos al Torneo Oficial!</h3>
@@ -228,7 +228,7 @@ function App() {
         {/* Sección Panel Admin: Publicar Noticias/Flyers */}
         {isAdmin && (
           <div className="admin-panel-card reveal">
-            <h3><Newspaper size={20} color="#ffb703" /> Crear Nueva Noticia o Flyer</h3>
+            <h3><Newspaper size={20} color="#e62e7b" /> Crear Nueva Noticia o Flyer</h3>
             <form onSubmit={handleCreateNews} className="admin-form">
               <input
                 type="text"
@@ -286,7 +286,7 @@ function App() {
         <div className="upload-card reveal">
           <form onSubmit={handleUpload} className="upload-form">
             <div className="file-dropzone" onClick={() => document.getElementById('fileInput').click()}>
-              <Camera size={40} color="#ffb703" />
+              <Camera size={40} color="#e62e7b" />
               <p style={{ marginTop: '10px' }}>
                 {file ? file.name : "Tocá acá para sacar foto o subir de la galería"}
               </p>
@@ -367,7 +367,7 @@ function App() {
         {/* Tarjeta QR */}
         <div className="qr-card reveal">
           <div className="qr-header">
-            <QrCode size={24} color="#ffb703" />
+            <QrCode size={24} color="#e62e7b" />
             <h3>Código QR del Evento</h3>
           </div>
           <p>Escaneá para acceder o descargalo para imprimir:</p>
@@ -430,7 +430,7 @@ function App() {
       <footer className="footer reveal">
         <div className="footer-content">
           <div className="footer-section brand-col">
-            <h2 className="footer-title"><Trophy size={22} color="#ffb703" /> LUCHA DE BRAZOS</h2>
+            <h2 className="footer-title"><Trophy size={22} color="#e62e7b" /> LUCHA DE BRAZOS</h2>
             <p className="footer-desc">
               El evento más grande de la disciplina. Viví la experiencia, compartí tus fotos en tiempo real y seguí cada enfrentamiento.
             </p>
@@ -448,7 +448,7 @@ function App() {
           </div>
 
           <div className="footer-section">
-            <h3><Clock size={18} color="#ffb703" /> Horarios</h3>
+            <h3><Clock size={18} color="#e62e7b" /> Horarios</h3>
             <ul>
               <li>Apertura de Puertas: 16:00 hs</li>
               <li>Inicio Torneo: 18:00 hs</li>
@@ -457,7 +457,7 @@ function App() {
           </div>
 
           <div className="footer-section location-col">
-            <h3><MapPin size={18} color="#ffb703" /> Ubicación</h3>
+            <h3><MapPin size={18} color="#e62e7b" /> Ubicación</h3>
             <p>Complejo Belgrano</p>
             <p className="address">Av. Saenz Peña 2100, Capital</p>
           </div>
