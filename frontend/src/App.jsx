@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { 
-  Camera, 
-  MessageCircle, 
-  Trophy, 
-  X, 
-  QrCode, 
-  Download, 
-  MapPin, 
-  Clock, 
+import {
+  Camera,
+  MessageCircle,
+  Trophy,
+  X,
+  QrCode,
+  Download,
+  MapPin,
+  Clock,
   Mail,
   Globe,
   Share2,
@@ -34,21 +34,22 @@ function App() {
   const [uploaderName, setUploaderName] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Estados de Admin y Noticias
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
-  
+
   const [newsTitle, setNewsTitle] = useState('');
   const [newsContent, setNewsContent] = useState('');
   const [newsFile, setNewsFile] = useState(null);
 
   const qrRef = useRef();
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const eventBannerUrl = "/banner.png"; 
+  const eventBannerUrl = "/banner.png";
 
-  const whatsappNumber = "5493812170571"; 
+  const whatsappNumber = "5493812170571";
   const whatsappMessage = encodeURIComponent("¡Hola! Quisiera más información sobre el evento de Lucha de Brazos 💪");
 
   const fetchPhotos = async () => {
@@ -106,6 +107,13 @@ function App() {
       await axios.post('http://localhost:5000/api/photos/upload', formData);
       setFile(null);
       setUploaderName('');
+      
+      // Mostrar cartel de éxito
+      setSuccessMessage('¡Foto subida correctamente! 🎉');
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 4000);
+
       fetchPhotos();
     } catch (err) {
       alert('Error al subir la imagen');
@@ -188,22 +196,25 @@ function App() {
     <div className="main-wrapper">
       <div className="container">
         {/* Encabezado con acceso Admin */}
-        <header className="header">
-          <div className="admin-bar">
-            {isAdmin ? (
-              <span className="admin-badge">
-                <Shield size={16} /> Modo Administrador
-                <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
-              </span>
-            ) : (
-              <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
-                <Shield size={16} /> Admin
-              </button>
-            )}
-          </div>
-          <h1><Trophy size={32} color="#ffb703" /> Lucha de Brazos</h1>
-          <p>Galería Oficial del Evento</p>
-        </header>
+        <header className="header header-flex">
+  <div className="header-center">
+    <h1> Lucha de Brazos</h1>
+    <p>Galería Oficial del Evento</p>
+  </div>
+
+  <div className="admin-bar">
+    {isAdmin ? (
+      <span className="admin-badge">
+        <Shield size={16} /> Modo Administrador
+        <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
+      </span>
+    ) : (
+      <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
+        <Shield size={16} /> Admin
+      </button>
+    )}
+  </div>
+</header>
 
         {/* Banner del Evento */}
         <div className="event-banner-card reveal">
@@ -219,25 +230,25 @@ function App() {
           <div className="admin-panel-card reveal">
             <h3><Newspaper size={20} color="#ffb703" /> Crear Nueva Noticia o Flyer</h3>
             <form onSubmit={handleCreateNews} className="admin-form">
-              <input 
-                type="text" 
-                placeholder="Título de la noticia o aviso" 
-                value={newsTitle} 
-                onChange={(e) => setNewsTitle(e.target.value)} 
+              <input
+                type="text"
+                placeholder="Título de la noticia o aviso"
+                value={newsTitle}
+                onChange={(e) => setNewsTitle(e.target.value)}
                 className="name-input"
               />
-              <textarea 
-                placeholder="Descripción / Detalle del evento o novedad..." 
-                value={newsContent} 
-                onChange={(e) => setNewsContent(e.target.value)} 
+              <textarea
+                placeholder="Descripción / Detalle del evento o novedad..."
+                value={newsContent}
+                onChange={(e) => setNewsContent(e.target.value)}
                 className="name-input textarea-input"
               />
               <div className="file-input-wrapper">
                 <label><ImageIcon size={18} /> Adjuntar Imagen/Flyer (Opcional):</label>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={(e) => setNewsFile(e.target.files[0])} 
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewsFile(e.target.files[0])}
                 />
               </div>
               <button type="submit" className="btn-primary">Publicar Novedad 📢</button>
@@ -248,7 +259,7 @@ function App() {
         {/* Sección de Noticias y Flyers */}
         {newsList.length > 0 && (
           <div className="news-section reveal">
-            <h2 className="gallery-title">Novedades y Flyers</h2>
+            <h2 className="gallery-title">Novedades y Noticias</h2>
             <div className="news-grid">
               {newsList.map((item) => (
                 <div key={item._id || item.id} className="news-card">
@@ -257,8 +268,8 @@ function App() {
                     <h3>{item.title}</h3>
                     <p>{item.content}</p>
                     {isAdmin && (
-                      <button 
-                        onClick={() => handleDeleteNews(item._id || item.id)} 
+                      <button
+                        onClick={() => handleDeleteNews(item._id || item.id)}
                         className="btn-delete"
                       >
                         <Trash2 size={16} /> Eliminar Noticia
@@ -279,25 +290,31 @@ function App() {
               <p style={{ marginTop: '10px' }}>
                 {file ? file.name : "Tocá acá para sacar foto o subir de la galería"}
               </p>
-              <input 
+              <input
                 id="fileInput"
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => setFile(e.target.files[0])} 
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files[0])}
                 style={{ display: 'none' }}
               />
             </div>
 
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Tu nombre (Opcional)"
               value={uploaderName}
               onChange={(e) => setUploaderName(e.target.value)}
               className="name-input"
             />
 
+            {successMessage && (
+              <div className="alert-success">
+                {successMessage}
+              </div>
+            )}
+
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Subiendo...' : 'Publicar Foto 🚀'}
+              {loading ? 'Subiendo...' : 'Publicar Foto'}
             </button>
           </form>
         </div>
@@ -332,7 +349,7 @@ function App() {
                       <p>📸 {photo.uploaderName || 'Invitado'}</p>
                     </div>
                     {isAdmin && (
-                      <button 
+                      <button
                         className="btn-delete-overlay"
                         onClick={(e) => handleDeletePhoto(photo._id || photo.id, e)}
                         title="Borrar Foto"
@@ -357,11 +374,11 @@ function App() {
           
           <div className="qr-container" ref={qrRef}>
             {currentUrl && (
-              <QRCodeCanvas 
-                value={currentUrl} 
-                size={180} 
-                bgColor={"#ffffff"} 
-                fgColor={"#000000"} 
+              <QRCodeCanvas
+                value={currentUrl}
+                size={180}
+                bgColor={"#ffffff"}
+                fgColor={"#000000"}
                 level={"H"}
                 includeMargin={true}
               />
@@ -391,8 +408,8 @@ function App() {
             <div className="admin-login-card" onClick={(e) => e.stopPropagation()}>
               <h3>Acceso Administrador</h3>
               <form onSubmit={handleAdminLogin}>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   placeholder="Contraseña"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
@@ -418,11 +435,11 @@ function App() {
               El evento más grande de la disciplina. Viví la experiencia, compartí tus fotos en tiempo real y seguí cada enfrentamiento.
             </p>
             <div className="social-links">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram">
+              <a href="https://www.instagram.com/luchadebrazostuc/" target="_blank" rel="noopener noreferrer" title="Instagram">
                 <Share2 size={18} /> Instagram
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" title="Facebook">
-                <Globe size={18} /> Web
+              <a href="https://www.facebook.com/poly.chaileduranvazquez" target="_blank" rel="noopener noreferrer" title="Facebook">
+                <Globe size={18} /> Facebook
               </a>
               <a href="mailto:contacto@luchadebrazos.com" title="Email">
                 <Mail size={18} />
@@ -452,15 +469,27 @@ function App() {
       </footer>
 
       {/* Botón Flotante WhatsApp */}
-      <a 
-        href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`} 
-        className="whatsapp-float" 
-        target="_blank" 
-        rel="noopener noreferrer"
-      >
-        <MessageCircle size={24} />
-        <span>Contacto</span>
-      </a>
+      <a
+  href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
+  className="whatsapp-float"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+  </svg>
+  <span>Contacto</span>
+</a>
     </div>
   );
 }
