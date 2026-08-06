@@ -486,6 +486,12 @@ div::-webkit-scrollbar {
   gap: 6px;
 }
 
+@media (max-width: 600px) {
+  .admin-text {
+    display: none;
+  }
+}
+
 /* Sección de Noticias */
 .news-section {
   margin-top: 0 !important; /* Elimina cualquier espacio superior acumulado */

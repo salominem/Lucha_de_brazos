@@ -209,16 +209,18 @@ function App() {
         </div>
 
         <div className="admin-bar header-right">
-          {isAdmin ? (
-            <span className="admin-badge">
-              <Shield size={16} /> Modo Administrador
-              <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
-            </span>
-          ) : (
-            <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
-              Login
-            </button>
-          )}
+         {isAdmin ? (
+  <span className="admin-badge">
+    <span className="admin-text">
+      <Shield size={16} /> Modo Administrador
+    </span>
+    <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
+  </span>
+) : (
+  <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
+    Login
+  </button>
+)}
         </div>
       </header>
 
