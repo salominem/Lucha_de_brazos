@@ -357,7 +357,7 @@ const handleFileChange = async (e) => {
     <div className="file-dropzone" onClick={() => document.getElementById('fileInput').click()}>
       <Camera size={40} color="#e62e7b" />
       <p style={{ marginTop: '10px' }}>
-        {file ? file.name : "Tocá acá para sacar foto o subir de la galería"}
+        {file ? file.name : "Tocá acá para subir de la galería"}
       </p>
       <input
         id="fileInput"
