@@ -191,6 +191,65 @@ function App() {
     document.body.removeChild(link);
   };
 
+  // Función para comprimir y achicar fotos pesadas en el celular
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const maxWidth = 1600; // Ancho máximo ideal para web
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error('Error al procesar la foto'));
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          0.75 // Comprime la calidad al 75% sin perder definición visible
+        );
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
+// Handler para el evento onChange del input
+const handleFileChange = async (e) => {
+  const selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+
+  try {
+    // Intenta comprimir la foto antes de subirla
+    const compressed = await compressImage(selectedFile);
+    setFile(compressed);
+  } catch (error) {
+    console.error('Error al optimizar imagen:', error);
+    setFile(selectedFile); // Fallback por si falla la compresión
+  }
+};
+
   return (
     <div className="main-wrapper">
       {/* Header fuera del container */}
@@ -292,43 +351,42 @@ function App() {
           </div>
         )}
 
-        {/* Formulario de Subida de Fotos */}
-        <div className="upload-card reveal">
-          <form onSubmit={handleUpload} className="upload-form">
-            <div className="file-dropzone" onClick={() => document.getElementById('fileInput').click()}>
-              <Camera size={40} color="#e62e7b" />
-              <p style={{ marginTop: '10px' }}>
-                {file ? file.name : "Tocá acá para sacar foto o subir de la galería"}
-              </p>
-              <input
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFile(e.target.files[0])}
-                style={{ display: 'none' }}
-              />
-            </div>
+       {/* Formulario de Subida de Fotos */}
+<div className="upload-card reveal">
+  <form onSubmit={handleUpload} className="upload-form">
+    <div className="file-dropzone" onClick={() => document.getElementById('fileInput').click()}>
+      <Camera size={40} color="#e62e7b" />
+      <p style={{ marginTop: '10px' }}>
+        {file ? file.name : "Tocá acá para sacar foto o subir de la galería"}
+      </p>
+      <input
+        id="fileInput"
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
+    </div>
 
-            <input
-              type="text"
-              placeholder="Tu nombre (Opcional)"
-              value={uploaderName}
-              onChange={(e) => setUploaderName(e.target.value)}
-              className="name-input"
-            />
+    <input
+      type="text"
+      placeholder="Tu nombre (Opcional)"
+      value={uploaderName}
+      onChange={(e) => setUploaderName(e.target.value)}
+      className="name-input"
+    />
 
-            {successMessage && (
-              <div className="alert-success">
-                {successMessage}
-              </div>
-            )}
+    {successMessage && (
+      <div className="alert-success">
+        {successMessage}
+      </div>
+    )}
 
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Subiendo...' : 'Publicar Foto'}
-            </button>
-          </form>
-        </div>
-
+    <button type="submit" className="btn-primary" disabled={loading}>
+      {loading ? 'Subiendo...' : 'Publicar Foto'}
+    </button>
+  </form>
+</div>
         {/* Carrusel de Fotos */}
         <h2 className="gallery-title reveal">Fotos del Evento</h2>
         
