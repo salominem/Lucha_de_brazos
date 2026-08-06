@@ -24,7 +24,6 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import ReactDOM from 'react-dom';
 import './App.css';
 
 function App() {
@@ -51,10 +50,11 @@ function App() {
 
   const whatsappNumber = "5493812170571";
   const whatsappMessage = encodeURIComponent("¡Hola! Quisiera más información sobre el evento de Lucha de Brazos 💪");
+  const API_URL = 'https://lucha-de-brazos-api.onrender.com';
 
   const fetchPhotos = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/photos');
+      const res = await axios.get(`${API_URL}/api/photos`);
       setPhotos(res.data || []);
     } catch (err) {
       console.error("Error al cargar fotos:", err);
@@ -63,7 +63,7 @@ function App() {
 
   const fetchNews = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/news');
+      const res = await axios.get(`${API_URL}/api/news`);
       setNewsList(res.data || []);
     } catch (err) {
       console.error("Error al cargar noticias:", err);
@@ -104,11 +104,10 @@ function App() {
 
     try {
       setLoading(true);
-      await axios.post('http://localhost:5000/api/photos/upload', formData);
+      await axios.post(`${API_URL}/api/photos/upload`, formData);
       setFile(null);
       setUploaderName('');
       
-      // Mostrar cartel de éxito
       setSuccessMessage('¡Foto subida correctamente! 🎉');
       setTimeout(() => {
         setSuccessMessage('');
@@ -125,7 +124,7 @@ function App() {
   // Login de Admin
   const handleAdminLogin = (e) => {
     e.preventDefault();
-    if (adminPassword === 'admin123') { // Cambiá esta clave por la que prefieras
+    if (adminPassword === 'admin123') {
       setIsAdmin(true);
       setShowLoginModal(false);
       setAdminPassword('');
@@ -139,7 +138,7 @@ function App() {
     e.stopPropagation();
     if (!window.confirm('¿Estás seguro de que querés borrar esta foto?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/photos/${id}`);
+      await axios.delete(`${API_URL}/api/photos/${id}`);
       fetchPhotos();
     } catch (err) {
       alert('Error al eliminar la foto');
@@ -157,7 +156,7 @@ function App() {
     if (newsFile) formData.append('image', newsFile);
 
     try {
-      await axios.post('http://localhost:5000/api/news', formData);
+      await axios.post(`${API_URL}/api/news`, formData);
       setNewsTitle('');
       setNewsContent('');
       setNewsFile(null);
@@ -172,7 +171,7 @@ function App() {
   const handleDeleteNews = async (id) => {
     if (!window.confirm('¿Borrar esta noticia?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/news/${id}`);
+      await axios.delete(`${API_URL}/api/news/${id}`);
       fetchNews();
     } catch (err) {
       alert('Error al borrar la noticia');
@@ -194,83 +193,76 @@ function App() {
 
   return (
     <div className="main-wrapper">
-  
-  {/* Header fuera del container */}
-  <header className="header header-flex header-distributed">
-    <div className="header-left">
-      <img 
-        src="/logo.jpg" 
-        alt="Logo Asociación Lucha de Brazos Tucumán" 
-        className="header-logo-circle"
-      />
-    </div>
-
-    <div className="header-center">
-      <h1>Lucha de Brazos</h1>
-      <p>Galería Oficial del Evento</p>
-    </div>
-
-    <div className="admin-bar header-right">
-      {isAdmin ? (
-        <span className="admin-badge">
-          <Shield size={16} /> Modo Administrador
-          <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
-        </span>
-      ) : (
-        <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
-          Login
-        </button>
-      )}
-    </div>
-  </header>
-
-  {/* BANNER FUERA DEL CONTAINER: Se expande al 100% y respeta el zoom exacto de las tarjetas */}
-  <div className="event-banner-card">
-    <img src={eventBannerUrl} alt="Banner del Evento" className="event-banner-img" />
-    <div className="banner-overlay">
-      <h3>¡Bienvenidos al Torneo Oficial!</h3>
-      <p>Subí tus mejores tomas de las peleas y compartilas en la galería en vivo.</p>
-    </div>
-  </div>
-
-  {/* AQUÍ ABRE EL CONTAINER PARA LAS NOVEDADES Y TARJETAS DE ABAJO */}
-  <div className="container">
-{/* CONTENEDOR INTERNO: Agrupa el resto de las secciones para mantener los márgenes */}
-<div className="container">
-
-  {/* Sección Panel Admin: Publicar Noticias/Flyers */}
-  {isAdmin && (
-    <div className="admin-panel-card reveal">
-      <h3><Newspaper size={20} color="#e62e7b" /> Crear Nueva Noticia o Flyer</h3>
-      <form onSubmit={handleCreateNews} className="admin-form">
-        <input
-          type="text"
-          placeholder="Título de la noticia o aviso"
-          value={newsTitle}
-          onChange={(e) => setNewsTitle(e.target.value)}
-          className="name-input"
-        />
-        <textarea
-          placeholder="Descripción / Detalle del evento o novedad..."
-          value={newsContent}
-          onChange={(e) => setNewsContent(e.target.value)}
-          className="name-input textarea-input"
-        />
-        <div className="file-input-wrapper">
-          <label><ImageIcon size={18} /> Adjuntar Imagen/Flyer (Opcional):</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setNewsFile(e.target.files[0])}
+      {/* Header fuera del container */}
+      <header className="header header-flex header-distributed">
+        <div className="header-left">
+          <img 
+            src="/logo.jpg" 
+            alt="Logo Asociación Lucha de Brazos Tucumán" 
+            className="header-logo-circle"
           />
         </div>
-        <button type="submit" className="btn-primary">Publicar Novedad 📢</button>
-      </form>
-    </div>
-  )}
 
-  {/* Aquí siguen las noticias, galería, etc. */}
-</div>
+        <div className="header-center">
+          <h1>Lucha de Brazos</h1>
+          <p>Galería Oficial del Evento</p>
+        </div>
+
+        <div className="admin-bar header-right">
+          {isAdmin ? (
+            <span className="admin-badge">
+              <Shield size={16} /> Modo Administrador
+              <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
+            </span>
+          ) : (
+            <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
+              Login
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* Banner fuera del container */}
+      <div className="event-banner-card">
+        <img src={eventBannerUrl} alt="Banner del Evento" className="event-banner-img" />
+        <div className="banner-overlay">
+          <h3>¡Bienvenidos al Torneo Oficial!</h3>
+          <p>Subí tus mejores tomas de las peleas y compartilas en la galería en vivo.</p>
+        </div>
+      </div>
+
+      {/* Contenedor principal de la aplicación */}
+      <div className="container">
+        {/* Sección Panel Admin: Publicar Noticias/Flyers */}
+        {isAdmin && (
+          <div className="admin-panel-card reveal">
+            <h3><Newspaper size={20} color="#e62e7b" /> Crear Nueva Noticia o Flyer</h3>
+            <form onSubmit={handleCreateNews} className="admin-form">
+              <input
+                type="text"
+                placeholder="Título de la noticia o aviso"
+                value={newsTitle}
+                onChange={(e) => setNewsTitle(e.target.value)}
+                className="name-input"
+              />
+              <textarea
+                placeholder="Descripción / Detalle del evento o novedad..."
+                value={newsContent}
+                onChange={(e) => setNewsContent(e.target.value)}
+                className="name-input textarea-input"
+              />
+              <div className="file-input-wrapper">
+                <label><ImageIcon size={18} /> Adjuntar Imagen/Flyer (Opcional):</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewsFile(e.target.files[0])}
+                />
+              </div>
+              <button type="submit" className="btn-primary">Publicar Novedad 📢</button>
+            </form>
+          </div>
+        )}
 
         {/* Sección de Noticias y Flyers */}
         {newsList.length > 0 && (
@@ -407,44 +399,44 @@ function App() {
         </div>
 
         {/* Modal de Imagen Ampliada */}
-       {selectedImage && createPortal(
-  <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
-    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-      <button className="close-btn" onClick={() => setSelectedImage(null)}>
-        <X size={28} />
-      </button>
-      <img src={selectedImage} alt="Foto ampliada" />
-    </div>
-  </div>,
-  document.body // Esto lo envía directamente a la raíz del cuerpo HTML
-)}
+        {selectedImage && createPortal(
+          <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="close-btn" onClick={() => setSelectedImage(null)}>
+                <X size={28} />
+              </button>
+              <img src={selectedImage} alt="Foto ampliada" />
+            </div>
+          </div>,
+          document.body
+        )}
 
-       {/* Modal Login Admin */}
-{showLoginModal && createPortal(
-  <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
-    <div className="admin-login-card" onClick={(e) => e.stopPropagation()}>
-      <h3>Acceso Administrador</h3>
-      <form onSubmit={handleAdminLogin}>
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={adminPassword}
-          onChange={(e) => setAdminPassword(e.target.value)}
-          className="name-input"
-          autoFocus
-        />
-        <div className="login-actions">
-          <button type="submit" className="btn-primary">Ingresar</button>
-          <button type="button" className="btn-secondary" onClick={() => setShowLoginModal(false)}>Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>,
-  document.body
-)}
+        {/* Modal Login Admin */}
+        {showLoginModal && createPortal(
+          <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
+            <div className="admin-login-card" onClick={(e) => e.stopPropagation()}>
+              <h3>Acceso Administrador</h3>
+              <form onSubmit={handleAdminLogin}>
+                <input
+                  type="password"
+                  placeholder="Contraseña"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="name-input"
+                  autoFocus
+                />
+                <div className="login-actions">
+                  <button type="submit" className="btn-primary">Ingresar</button>
+                  <button type="button" className="btn-secondary" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
       </div>
 
-      {/* Footer */}
+      {/* Footer fuera del container */}
       <footer className="footer reveal">
         <div className="footer-content">
           <div className="footer-section brand-col">
@@ -488,26 +480,26 @@ function App() {
 
       {/* Botón Flotante WhatsApp */}
       <a
-  href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
-  className="whatsapp-float"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
-  </svg>
-  <span>Contacto</span>
-</a>
+        href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
+        className="whatsapp-float"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+          <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+        </svg>
+        <span>Contacto</span>
+      </a>
     </div>
   );
 }
