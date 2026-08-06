@@ -43,6 +43,7 @@ html {
   height: 100% !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
+  color: #ff4792;
 }
 
 body {
@@ -72,52 +73,169 @@ div::-webkit-scrollbar {
   box-sizing: border-box !important;
 }
 
-/* Header Flex Layout */
-.header-flex {
-  position: relative;
+.header.header-flex.header-distributed {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important; /* 3 columnas: Izq, Centro, Der */
+  align-items: center !important;
+  width: 100% !important;
+  padding: 15px 20px !important;
+  background-color: #0d0d11 !important;
+  border-bottom: 2px solid #ff4792 !important; /* Línea rosa de lado a lado */
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Columna 1: Logo a la izquierda */
+.header-left {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+}
+
+/* Columna 2: Título en el centro exacto */
+.header.header-flex.header-distributed .header-center {
+  position: static !important; /* Eliminamos el absolute que rompía el alto */
+  transform: none !important;
+  text-align: center !important;
+}
+
+.header.header-flex.header-distributed .header-center h1 {
+  font-family: Georgia, 'Times New Roman', Times, serif !important;
+  font-size: 1.8rem !important;
+  font-weight: 500 !important;
+  color: #ff4792 !important; /* Rosa pedido */
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.header.header-flex.header-distributed .header-center p {
+  font-size: 0.85rem !important;
+  color: var(--text-muted, #aaa) !important;
+  margin: 2px 0 0 0 !important;
+}
+
+/* Columna 3: Login a la derecha */
+.admin-bar.header-right,
+.header .admin-bar {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
+/* Logo circular */
+.header-logo-circle {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid #ff4792 !important;
+  box-shadow: 0 0 10px rgba(255, 71, 146, 0.4) !important;
+  display: block !important;
+}
+
+/* --- CENTRADO ABSOLUTO EN MOBILE --- */
+@media (max-width: 600px) {
+  .header.header-flex.header-distributed {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative !important; /* Base para el centrado del título */
+    padding: 10px 12px !important;
+  }
+
+  /* Ocultamos el subtítulo en celus */
+  .header.header-flex.header-distributed .header-center p {
+    display: none !important;
+  }
+
+  /* Forzamos el título al centro matemático de la pantalla */
+  .header.header-flex.header-distributed .header-center {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    text-align: center !important;
+    pointer-events: none; /* Para evitar colisión con clics de botones */
+  }
+
+  .header.header-flex.header-distributed .header-center h1 {
+    font-size: 1.1rem !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+
+  /* Achicamos logo y botón para que no tapen al título */
+  .header-logo-circle {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .btn-admin-access {
+    padding: 4px 10px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* 3. Contenedor Derecho (Admin/Login) */
+.admin-bar.header-right {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 10px 0 20px 0;
+  justify-content: flex-end;
+  flex: 1; /* Ocupa 1 parte del espacio disponible (igual que el logo) */
+  min-width: 150px; /* Ancho mínimo igual al de la izquierda para balance */
+  margin: 0 !important;
+  text-align: right;
 }
 
-.header-center {
-  text-align: center;
-}
-
-.header-flex .admin-bar {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.header {
-  position: relative;
-  text-align: center;
-  padding: 15px 10px;
-}
-
-.header h1 {
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 2rem;
-  font-weight: 500;
-  letter-spacing: 1px;
+/* Estilos de tus botones (manteniendo los existentes) */
+.btn-admin-access {
+  /* ... tus estilos existentes ... */
+  background: transparent;
   color: var(--accent-pink);
+  border: 2px solid var(--accent-pink);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  white-space: nowrap; /* Evita que el texto Login se rompa */
+}
+
+.btn-admin-access:hover {
+  background: var(--accent-pink);
+  color: #fff;
+  box-shadow: 0 0 10px var(--pink-glow);
+}
+
+/* Estilos de la badge de admin (manteniendo los existentes) */
+.admin-badge {
+  /* ... tus estilos existentes ... */
+  background: rgba(230, 46, 123, 0.15);
+  color: var(--accent-pink);
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 15px;
-  text-shadow: 0 0 12px var(--pink-glow);
+  gap: 8px;
+  border: 1px solid var(--accent-pink);
 }
 
-.header p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  font-weight: 500;
-  margin-top: 4px;
+.btn-logout {
+  /* ... tus estilos existentes ... */
+  background: transparent;
+  border: none;
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.75rem;
+  margin-left: 8px;
 }
-
 /* Barra de Admin en Header */
 .admin-bar {
   display: flex;
@@ -170,15 +288,12 @@ div::-webkit-scrollbar {
   font-size: 0.75rem;
 }
 
-/* Banner del Evento */
+/* Banner de ancho completo que respeta el Zoom */
 .event-banner-card {
-  width: 100vw !important;
-  max-width: 100vw !important;
+  width: 100% !important;
+  max-width: 100% !important;
   position: relative !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  margin-top: 0 !important;
-  margin-bottom: 30px !important;
+  margin: 0 0 30px 0 !important; /* Eliminados los margin calc(-50vw) */
   overflow: hidden !important;
   border-radius: 0 !important;
 }
@@ -222,25 +337,46 @@ div::-webkit-scrollbar {
   margin-bottom: 10px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
-
 @media (max-width: 768px) {
-  .event-banner-img {
-    height: 300px !important;
+  /* 1. Hace el banner gigante ocupando casi todo el alto de la pantalla */
+  .event-banner-card {
+    height: 75vh !important; /* Ocupa el 75% del alto total de la pantalla del celular */
+    min-height: 450px !important;
+    max-height: 600px !important;
+    margin-bottom: 20px !important;
   }
+
+  .event-banner-img {
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  /* 2. Resetea la sección de noticias para que quede de forma natural abajo */
+  .news-section {
+    margin-top: 0 !important;
+  }
+
+  /* Ajuste de textos en el banner masivo */
   .banner-overlay {
     left: 20px;
-    bottom: 25px;
+    bottom: 30px;
     right: 20px;
   }
+
   .banner-overlay h3 {
     font-size: 1.8rem;
+    line-height: 1.1;
   }
+
   .banner-overlay p {
-    font-size: 0.75rem;
-    letter-spacing: 1px;
+    font-size: 0.8rem;
+    letter-spacing: 0.8px;
+    margin-top: 8px;
   }
 }
-
 /* Formulario de Subida */
 .upload-card {
   background: var(--card-bg);
@@ -352,7 +488,9 @@ div::-webkit-scrollbar {
 
 /* Sección de Noticias */
 .news-section {
+  margin-top: 0 !important; /* Elimina cualquier espacio superior acumulado */
   margin-bottom: 35px;
+  padding-top: 0 !important;
 }
 
 .news-grid {
@@ -411,6 +549,19 @@ div::-webkit-scrollbar {
   font-size: 0.85rem;
   align-self: flex-start;
   margin-top: 10px;
+}
+
+/* Ajuste defensivo para celulares */
+@media (max-width: 768px) {
+  .news-section {
+    margin-top: -10px !important; /* Tira del título 'Novedades y Noticias' hacia arriba */
+  }
+  
+  .news-section h2, 
+  .news-section .section-title {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
 }
 
 /* Carrusel y Galería */
@@ -494,25 +645,30 @@ div::-webkit-scrollbar {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 99999; /* Asegura quedar por encima de todo */
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .modal-content {
   position: relative;
   max-width: 90%;
   max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-content img {
   max-width: 100%;
   max-height: 85vh;
+  object-fit: contain;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }
@@ -584,7 +740,6 @@ div::-webkit-scrollbar {
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 20px;
-  margin-bottom: 30px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -645,7 +800,7 @@ div::-webkit-scrollbar {
 .footer {
   background-color: #08080a;
   border-top: 1px solid var(--border-color);
-  margin-top: 50px;
+  margin-top: 30px;
   padding: 40px 20px 20px 20px;
   color: var(--text-main);
 }

@@ -18,13 +18,13 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
-
+import { createPortal } from 'react-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-
+import ReactDOM from 'react-dom';
 import './App.css';
 
 function App() {
@@ -194,67 +194,83 @@ function App() {
 
   return (
     <div className="main-wrapper">
-      <div className="container">
-        {/* Encabezado con acceso Admin */}
-        <header className="header header-flex">
-  <div className="header-center">
-    <h1> Lucha de Brazos</h1>
-    <p>Galería Oficial del Evento</p>
+  
+  {/* Header fuera del container */}
+  <header className="header header-flex header-distributed">
+    <div className="header-left">
+      <img 
+        src="/logo.jpg" 
+        alt="Logo Asociación Lucha de Brazos Tucumán" 
+        className="header-logo-circle"
+      />
+    </div>
+
+    <div className="header-center">
+      <h1>Lucha de Brazos</h1>
+      <p>Galería Oficial del Evento</p>
+    </div>
+
+    <div className="admin-bar header-right">
+      {isAdmin ? (
+        <span className="admin-badge">
+          <Shield size={16} /> Modo Administrador
+          <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
+        </span>
+      ) : (
+        <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
+          Login
+        </button>
+      )}
+    </div>
+  </header>
+
+  {/* BANNER FUERA DEL CONTAINER: Se expande al 100% y respeta el zoom exacto de las tarjetas */}
+  <div className="event-banner-card">
+    <img src={eventBannerUrl} alt="Banner del Evento" className="event-banner-img" />
+    <div className="banner-overlay">
+      <h3>¡Bienvenidos al Torneo Oficial!</h3>
+      <p>Subí tus mejores tomas de las peleas y compartilas en la galería en vivo.</p>
+    </div>
   </div>
 
-  <div className="admin-bar">
-    {isAdmin ? (
-      <span className="admin-badge">
-        <Shield size={16} /> Modo Administrador
-        <button onClick={() => setIsAdmin(false)} className="btn-logout">Salir</button>
-      </span>
-    ) : (
-      <button onClick={() => setShowLoginModal(true)} className="btn-admin-access">
-         Login
-      </button>
-    )}
-  </div>
-</header>
+  {/* AQUÍ ABRE EL CONTAINER PARA LAS NOVEDADES Y TARJETAS DE ABAJO */}
+  <div className="container">
+{/* CONTENEDOR INTERNO: Agrupa el resto de las secciones para mantener los márgenes */}
+<div className="container">
 
-        {/* Banner del Evento */}
-        <div className="event-banner-card">
-          <img src={eventBannerUrl} alt="Banner del Evento" className="event-banner-img" />
-          <div className="banner-overlay">
-            <h3>¡Bienvenidos al Torneo Oficial!</h3>
-            <p>Subí tus mejores tomas de las peleas y compartilas en la galería en vivo.</p>
-          </div>
+  {/* Sección Panel Admin: Publicar Noticias/Flyers */}
+  {isAdmin && (
+    <div className="admin-panel-card reveal">
+      <h3><Newspaper size={20} color="#e62e7b" /> Crear Nueva Noticia o Flyer</h3>
+      <form onSubmit={handleCreateNews} className="admin-form">
+        <input
+          type="text"
+          placeholder="Título de la noticia o aviso"
+          value={newsTitle}
+          onChange={(e) => setNewsTitle(e.target.value)}
+          className="name-input"
+        />
+        <textarea
+          placeholder="Descripción / Detalle del evento o novedad..."
+          value={newsContent}
+          onChange={(e) => setNewsContent(e.target.value)}
+          className="name-input textarea-input"
+        />
+        <div className="file-input-wrapper">
+          <label><ImageIcon size={18} /> Adjuntar Imagen/Flyer (Opcional):</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setNewsFile(e.target.files[0])}
+          />
         </div>
+        <button type="submit" className="btn-primary">Publicar Novedad 📢</button>
+      </form>
+    </div>
+  )}
 
-        {/* Sección Panel Admin: Publicar Noticias/Flyers */}
-        {isAdmin && (
-          <div className="admin-panel-card reveal">
-            <h3><Newspaper size={20} color="#e62e7b" /> Crear Nueva Noticia o Flyer</h3>
-            <form onSubmit={handleCreateNews} className="admin-form">
-              <input
-                type="text"
-                placeholder="Título de la noticia o aviso"
-                value={newsTitle}
-                onChange={(e) => setNewsTitle(e.target.value)}
-                className="name-input"
-              />
-              <textarea
-                placeholder="Descripción / Detalle del evento o novedad..."
-                value={newsContent}
-                onChange={(e) => setNewsContent(e.target.value)}
-                className="name-input textarea-input"
-              />
-              <div className="file-input-wrapper">
-                <label><ImageIcon size={18} /> Adjuntar Imagen/Flyer (Opcional):</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setNewsFile(e.target.files[0])}
-                />
-              </div>
-              <button type="submit" className="btn-primary">Publicar Novedad 📢</button>
-            </form>
-          </div>
-        )}
+  {/* Aquí siguen las noticias, galería, etc. */}
+</div>
 
         {/* Sección de Noticias y Flyers */}
         {newsList.length > 0 && (
@@ -391,39 +407,41 @@ function App() {
         </div>
 
         {/* Modal de Imagen Ampliada */}
-        {selectedImage && (
-          <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="close-btn" onClick={() => setSelectedImage(null)}>
-                <X size={28} />
-              </button>
-              <img src={selectedImage} alt="Foto ampliada" />
-            </div>
-          </div>
-        )}
+       {selectedImage && createPortal(
+  <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <button className="close-btn" onClick={() => setSelectedImage(null)}>
+        <X size={28} />
+      </button>
+      <img src={selectedImage} alt="Foto ampliada" />
+    </div>
+  </div>,
+  document.body // Esto lo envía directamente a la raíz del cuerpo HTML
+)}
 
-        {/* Modal Login Admin */}
-        {showLoginModal && (
-          <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
-            <div className="admin-login-card" onClick={(e) => e.stopPropagation()}>
-              <h3>Acceso Administrador</h3>
-              <form onSubmit={handleAdminLogin}>
-                <input
-                  type="password"
-                  placeholder="Contraseña"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  className="name-input"
-                  autoFocus
-                />
-                <div className="login-actions">
-                  <button type="submit" className="btn-primary">Ingresar</button>
-                  <button type="button" className="btn-secondary" onClick={() => setShowLoginModal(false)}>Cancelar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+       {/* Modal Login Admin */}
+{showLoginModal && createPortal(
+  <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
+    <div className="admin-login-card" onClick={(e) => e.stopPropagation()}>
+      <h3>Acceso Administrador</h3>
+      <form onSubmit={handleAdminLogin}>
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={adminPassword}
+          onChange={(e) => setAdminPassword(e.target.value)}
+          className="name-input"
+          autoFocus
+        />
+        <div className="login-actions">
+          <button type="submit" className="btn-primary">Ingresar</button>
+          <button type="button" className="btn-secondary" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>,
+  document.body
+)}
       </div>
 
       {/* Footer */}
