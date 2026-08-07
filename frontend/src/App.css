@@ -75,6 +75,8 @@ div::-webkit-scrollbar {
 }
 
 .header.header-flex.header-distributed {
+  margin-top: 10px;
+  margin-bottom: 25px;
   display: grid !important;
   grid-template-columns: 1fr auto 1fr !important; /* 3 columnas: Izq, Centro, Der */
   align-items: center !important;
