@@ -145,7 +145,7 @@ div::-webkit-scrollbar {
     justify-content: space-between !important;
     align-items: center !important;
     position: relative !important; /* Base para el centrado del título */
-    padding: 10px 12px !important;
+    padding: 20px 12px !important;
   }
 
   /* Ocultamos el subtítulo en celus */
@@ -164,7 +164,7 @@ div::-webkit-scrollbar {
   }
 
   .header.header-flex.header-distributed .header-center h1 {
-    font-size: 1.1rem !important;
+    font-size: 1.0rem !important;
     white-space: nowrap !important;
     margin: 0 !important;
   }
@@ -344,7 +344,7 @@ div::-webkit-scrollbar {
   /* 1. Hace el banner gigante ocupando casi todo el alto de la pantalla */
   .event-banner-card {
     height: 75vh !important; /* Ocupa el 75% del alto total de la pantalla del celular */
-    min-height: 450px !important;
+    min-height: 550px !important;
     max-height: 600px !important;
     margin-bottom: 20px !important;
   }
