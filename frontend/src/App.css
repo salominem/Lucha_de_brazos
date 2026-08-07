@@ -103,10 +103,10 @@ div::-webkit-scrollbar {
 
 .header.header-flex.header-distributed .header-center h1 {
   font-family: 'Anton', 'Bebas Neue', Impact, sans-serif !important;
-  font-size: 2.2rem !important; /* Le subí un poco el tamaño porque esta tipografía es más compacta */
+  font-size: 1.9rem !important; /* Le subí un poco el tamaño porque esta tipografía es más compacta */
   font-weight: 900 !important;
   text-transform: uppercase !important; /* Para que quede en mayúsculas impactantes */
-  letter-spacing: 1px !important; /* Espaciado clave para que luzca imponente */
+  letter-spacing: 10px !important; /* Espaciado clave para que luzca imponente */
   color: #ff4792 !important;
   margin: 0 !important;
   padding: 0 !important;
