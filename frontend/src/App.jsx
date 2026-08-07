@@ -506,10 +506,10 @@ const handleFileChange = async (e) => {
             </p>
             <div className="social-links">
               <a href="https://www.instagram.com/luchadebrazostuc/" target="_blank" rel="noopener noreferrer" title="Instagram">
-                <Share2 size={18} /> Instagram
+                Instagram
               </a>
               <a href="https://www.facebook.com/poly.chaileduranvazquez" target="_blank" rel="noopener noreferrer" title="Facebook">
-                <Globe size={18} /> Facebook
+                Facebook
               </a>
               <a href="mailto:contacto@luchadebrazos.com" title="Email">
                 <Mail size={18} />

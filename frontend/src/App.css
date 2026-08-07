@@ -860,7 +860,7 @@ div::-webkit-scrollbar {
   color: var(--text-muted);
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   display: flex;
   align-items: center;
